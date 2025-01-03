@@ -33,7 +33,7 @@ jobs:
       
       - name: cancel run if same versions
         if: steps.last_build.outputs.release == steps.opendtu_release.outputs.release
-        uses: andymckay/cancel-action@0.4#
+        uses: andymckay/cancel-action@0.4
       
       - name: Clone OpenDTU
         run: git clone $GIT_CLONE_URL opendtu
