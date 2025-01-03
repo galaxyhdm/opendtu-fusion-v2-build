@@ -80,6 +80,8 @@ jobs:
           name: ${{ steps.opendtu_release.outputs.release }}
           tag_name:  ${{ steps.opendtu_release.outputs.release }}
           body: |
-            OpenDTU commit ${{ env.COMMIT }}
+            OpenDTU release: ${{ steps.opendtu_release.outputs.release }}
+            OpenDTU commit: ${{ env.COMMIT }}
+            ${{ steps.opendtu_release.outputs.description }}
           files: |
             ./opendtu/.pio/build/opendtufusionv2/opendtu-fusionv2.bin
