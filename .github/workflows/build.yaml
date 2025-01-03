@@ -1,0 +1,83 @@
+name: OpenDTU Fusion v2 Build
+
+on:
+  schedule:
+    - cron:  '0 3 * * *'
+  push:
+    branches:
+      - main
+env:
+  GIT_CLONE_URL: https://github.com/tbnobody/OpenDTU.git
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: opendtu_release
+        name: Get last OpenDTU release
+        uses: pozetroninc/github-action-get-latest-release@v0.8.0
+        with:
+          repository: tbnobody/OpenDTU
+          excludes: prerelease, draft
+      
+      - id: last_build
+        name: Get lastest Build
+        uses: pozetroninc/github-action-get-latest-release@v0.8.0
+        with:
+          repository: galaxyhdm/opendtu-fusion-v2-build
+          excludes: prerelease, draft
+      
+      - name: cancel run if same versions
+        if: steps.last_build.outputs.release == steps.opendtu_release.outputs.release
+        uses: andymckay/cancel-action@0.4#
+      
+      - name: Clone OpenDTU
+        run: git clone $GIT_CLONE_URL opendtu
+
+      - id: get_opendtu_version
+        name: Get OpenDTU Version
+        run: |
+          cd opendtu
+          git fetch --tags
+          export TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
+          git checkout $TAG
+
+          echo "TAG=$TAG" >> $GITHUB_ENV
+          echo "COMMIT=$(git log --format="%h" -n 1)" >> $GITHUB_ENV
+      
+      - name: Cache 
+        uses: actions/cache@v4.2.0
+        with:
+          path: |
+            ~/.cache/pip
+            ~/.platformio/.cache
+          key: ${{ runner.os }}-pio
+
+      - name: Setup Python
+        uses: actions/setup-python@v5.3.0
+        with:
+          python-version: '3.x'
+
+      - name: Install PlatformIO Core
+        run: pip install --upgrade setuptools platformio
+
+      - name: Build PlatformIO Project
+        run: |
+          cd opendtu 
+          pio run -e opendtufusionv2
+          mv ./.pio/build/opendtufusionv2/firmware.bin ./.pio/build/opendtufusionv2/opendtu-fusionv2.bin
+
+      - id: create_release
+        name: Release
+        uses: softprops/action-gh-release@v2.2.0
+        with:
+          name: ${{ steps.opendtu_release.outputs.release }}
+          tag_name:  ${{ steps.opendtu_release.outputs.release }}
+          body: |
+            OpenDTU commit ${{ env.COMMIT }}
+          files: |
+            ./opendtu/.pio/build/opendtufusionv2/opendtu-fusionv2.bin
