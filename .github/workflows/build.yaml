@@ -9,6 +9,8 @@ on:
 env:
   GIT_CLONE_URL: https://github.com/tbnobody/OpenDTU.git
 
+permissions:
+  contents: write
 
 jobs:
   build:
