@@ -2,7 +2,7 @@ name: OpenDTU Fusion v2 Build
 
 on:
   schedule:
-    - cron:  '0 3 * * *'
+    - cron:  '1 0 * * *'
   push:
     branches:
       - main
