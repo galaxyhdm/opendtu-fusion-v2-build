@@ -75,7 +75,7 @@ jobs:
 
       - id: create_release
         name: Release
-        uses: softprops/action-gh-release@v2.0
+        uses: softprops/action-gh-release@v2
         with:
           name: ${{ steps.opendtu_release.outputs.release }}
           tag_name:  ${{ steps.opendtu_release.outputs.release }}
